@@ -1,0 +1,108 @@
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ * @flow
+ */
+
+import React, { Component } from 'react';
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Button,
+  Alert,
+  FlatList,
+  DrawerLayoutAndroid,
+  ToolbarAndroid,
+  StatusBar
+} from 'react-native';
+
+const instructions = Platform.select({
+  ios: 'Press Cmd+R to reload,\n' +
+    'Cmd+D or shake for dev menu',
+  android: 'Double tap R on your keyboard to reload,\n' +
+    'Shake or press menu button for dev menu',
+});
+class Greeting extends Component {
+  render() {
+    return (
+      <Text>Hello {this.props.name}!</Text>
+    );
+  }
+}
+export default class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {text: ''};
+  }
+  clickMe(){
+    // this.state.text
+    console.log("click me");
+  }
+  _onPressButton() {
+    Alert.alert('You tapped the button!')
+  }
+  
+  onActionSelected(pos) {
+    if (pos === 0) {
+      showSettings();
+    }
+  }
+
+  render() {
+    return (
+      <DrawerLayoutAndroid
+      drawerWidth={100}
+      drawerPosition={DrawerLayoutAndroid.positions.Left}
+      renderNavigationView={() => navigationView}
+      onDrawerStateChanged={(new_state)=>{}}
+      onDrawerClose={()=>{this._onPressButton}}
+      drawerBackgroundColor='rgba(0,0,0,5)'
+      >
+      {/* <View style={styles.container}/> */}
+      <StatusBar backgroundColor='#8E24AA'
+      animated={true}/>
+      <ToolbarAndroid
+      logo={require('./ic_launcher.png')}
+      title="AwesomeApp"
+      actions={[{title: 'Settings', icon: require('./ic_launcher.png'), show: 'always'}]}
+      onActionSelected={this.onActionSelected} 
+      backgroundColor='#8E24AA'/>
+      </DrawerLayoutAndroid>
+    );
+  }
+  
+}
+var navigationView = (
+  <View style={{flex: 1, backgroundColor: '#fff'}}>
+    <Text style={{margin: 10, fontSize: 15, textAlign: 'left'}}>I'm in the Drawer!</Text>
+  </View>
+);
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    },
+  welcome: {
+    fontSize: 20,
+    textAlign: 'center',
+    margin: 10,
+  },
+  instructions: {
+    textAlign: 'center',
+    color: '#31c1f7',
+    marginBottom: 5,
+  },
+  item: {
+    padding: 10,
+    fontSize: 18,
+    height: 44,
+  },
+});
