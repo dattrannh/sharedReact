@@ -8,8 +8,11 @@ import {
   Dimensions,
   TouchableOpacity,
   Animated,
-  PanResponder
+  BackHandler,
+  PanResponder,
+  ScrollView
 } from 'react-native';
+import Transition from "./Transition";
 
 const maxWidth = Dimensions.get('window').width;
 
@@ -20,16 +23,18 @@ export default class DetailScreen extends Component {
       pan: new Animated.ValueXY(),
       opacity: new Animated.Value(1),
       showDraggable: true,
-      localPhoto: null
+      localPhoto: null,
+      scroll: true
     }
   }
+
   componentWillReceiveProps(nextProps) {
     const { photo } = nextProps;
     if (photo) {
       this.setState({ localPhoto: photo });
     }
   }
- translate(){
+  translate(){
     Animated.timing(this.state.pan, {
         toValue: { x: 0, y: 0 },
         duration:100,
@@ -55,45 +60,44 @@ export default class DetailScreen extends Component {
         }
       },
       onPanResponderMove:(e, gestureState) => {
-        if(isMoving){
+        if(isMoving && gestureState.dy>0){
           Animated.event([ null, {dx: 0, dy: this.state.pan.y}, ])(e, gestureState)
         }
       },
       onPanResponderRelease: (e, gestureState) => {
+        console.log('myInfo',JSON.stringify(gestureState))
         this.state.pan.flattenOffset();
         if(isMoving){
           if(gestureState.vy > 0.8){
-            this.props.onClose(this.state.localPhoto.id)
-            this.state.pan.setValue({x:0,y:0});
-          }else if(gestureState.dy < 150){
+            this.props.onClose(this.state.localPhoto.id,gestureState.dy)
+          }else if(gestureState.dy < 200){
               this.translate()
             }else{
-                this.props.onClose(this.state.localPhoto.id)
-                this.state.pan.setValue({x:0,y:0});
+                this.props.onClose(this.state.localPhoto.id,gestureState.dy)
             }
         }
+        this.setState({scroll:true})
         isMoving = false
       }
     });
-}
-
-
+  }
+  resetAnim(){
+    this.state.pan.setValue({x:0,y:0});
+  }
   render() {
-    const transform={
-      transform : this.state.pan.getTranslateTransform()
-     }
-    const { onClose, openProgress, isAnimating } = this.props;
+    const { onClose, openProgress } = this.props;
     const { localPhoto } = this.state;
-    if (localPhoto) {
+    // if (localPhoto) {
       return (
+      
         <Animated.View
          {...this.panResponder.panHandlers}
-          style={[StyleSheet.absoluteFill,transform]}
-          pointerEvents={isAnimating || this.props.photo ? 'auto' : 'none'}
+          style={[StyleSheet.absoluteFill,{transform:[{translateY:this.state.pan.y}]}]}
+          pointerEvents={this.props.photo ? 'auto' : 'none'}
         >
           <Animated.Image
             ref={r => (this._openingImageRef = r)}
-            source={localPhoto.source}
+            source={localPhoto ? localPhoto.source : null}
             style={{
               width: maxWidth,
               height: 300,
@@ -121,12 +125,42 @@ export default class DetailScreen extends Component {
             ]}
           >
             <Text style={styles.title}>
-              - {localPhoto.postedBy}
+              - {localPhoto ? localPhoto.postedBy : null}
             </Text>
-            <Text style={styles.description}>
-            Pass params to a route by putting them in an 
-            object as a second parameter to the 
-            </Text>
+              <Text style={styles.description}>
+              Component that wraps platform ScrollView
+               while providing integration with touch 
+               locking "responder" system.
+              Keep in mind that 
+              ScrollViews must have a bounded height in
+              order to work, since they contain unbounded-height
+               children into a bounded container 
+               (via a scroll interaction). 
+               In order to bound the height of
+                a ScrollView, either set the height
+                 of the view directly (discouraged) 
+                 or make sure all parent views have bounded
+                  height. Forgetting to transfer
+                   down the view stack can lead 
+                   to errors here, which the element 
+                   inspector makes easy to debug.
+                   Component that wraps platform ScrollView
+               while providing integration with touch 
+               locking "responder" system.
+              Keep in mind that 
+              ScrollViews must have a bounded height in
+              order to work, since they contain unbounded-height
+               children into a bounded container 
+               (via a scroll interaction). 
+               In order to bound the height of
+                a ScrollView, either set the height
+                 of the view directly (discouraged) 
+                 or make sure all parent views have bounded
+                  height. Forgetting to transfer
+                   down the view stack can lead 
+                   to errors here, which the element 
+                   inspector makes easy to debug.
+              </Text>
           </Animated.View>
           <Animated.View
             style={{
@@ -135,7 +169,7 @@ export default class DetailScreen extends Component {
               left: 20,
               opacity: openProgress
             }}
-            pointerEvents={isAnimating ? 'none' : 'auto'}
+            pointerEvents={ 'auto'}
           >
             <TouchableOpacity
               onPress={() => onClose(localPhoto.id)}
@@ -146,8 +180,21 @@ export default class DetailScreen extends Component {
           </Animated.View>
         </Animated.View>
       );
+    // }
+    // return null;
+  }
+  componentDidMount() {
+    BackHandler.addEventListener(
+      "hardwareBackPress",
+      this.onBackPress.bind(this)
+    );
+  }
+  onBackPress() {
+    if(this.props.photo !=null){
+      this.props.onClose(this.state.localPhoto.id)
+      return true;
     }
-    return <View />;
+    return false
   }
 }
 

@@ -28,13 +28,11 @@ export default class Transition extends React.Component {
   };
 
   componentWillReceiveProps(nextProps) {
-    const { photo, sourceImageRefs } = nextProps;
-
+    const { photo, sourceImageRefs,pan } = nextProps;
     if (photo) {
       const sourceImageRef = sourceImageRefs[photo.id];
       
-      sourceImageRef
-        .getNode()
+      sourceImageRef.getNode()
         .measure((soruceX, soruceY, width, height, pageX, pageY) => {
           this.setState({
             sourceDimension: {
@@ -58,41 +56,31 @@ export default class Transition extends React.Component {
     const { openProgress } = this.props;
     const { destinationDimension, sourceDimension, photo } = this.state;
     if (photo) {
-      let destRightDimension = {
-        width: 0,
-        height: 0,
-        pageX: 0,
-        pageY: 0
-      };
+  
       let openingInitScale = 1;
 
       const aspectRatio = photo.width / photo.height;
-      const screenAspectRatio =
-        destinationDimension.width / destinationDimension.height;
+      const screenAspectRatio = destinationDimension.width / destinationDimension.height;
 
       destRightDimension = {
         width: destinationDimension.width,
         height: destinationDimension.height,
         pageX: destinationDimension.pageX,
-        pageY: destinationDimension.pageY
+        pageY: this.props.pageY
       };
 
       if (aspectRatio - screenAspectRatio > 0) {
         destRightDimension.width = aspectRatio * destRightDimension.height;
-        destRightDimension.pageX -=
-          (destRightDimension.width - destinationDimension.width) / 2;
+        destRightDimension.pageX -= (destRightDimension.width - destinationDimension.width) / 2;
       } else {
         destRightDimension.height = destRightDimension.width / aspectRatio;
-        destRightDimension.pageY -=
-          (destRightDimension.height - destinationDimension.height) / 2;
+        destRightDimension.pageY -= (destRightDimension.height - destinationDimension.height) / 2;
       }
 
       const translateInitX = sourceDimension.pageX + sourceDimension.width / 2;
       const translateInitY = sourceDimension.pageY + sourceDimension.height / 2;
-      const translateDestX =
-        destRightDimension.pageX + destRightDimension.width / 2;
-      const translateDestY =
-        destRightDimension.pageY + destRightDimension.height / 2;
+      const translateDestX = destRightDimension.pageX + destRightDimension.width / 2;
+      const translateDestY = destRightDimension.pageY + destRightDimension.height / 2;
 
       openingInitTranslateX = translateInitX - translateDestX;
       openingInitTranslateY = translateInitY - translateDestY;

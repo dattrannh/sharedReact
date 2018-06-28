@@ -46,6 +46,10 @@ export default class Transition extends React.Component {
             photo
           });
         });
+    }else{
+      this.setState({
+        photo:null
+      });
     }
   }
 
@@ -132,6 +136,6 @@ export default class Transition extends React.Component {
         />
       );
     }
-    return <View />;
+    return null;
   }
 }

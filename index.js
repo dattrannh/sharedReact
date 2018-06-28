@@ -4,4 +4,4 @@ import Main from './Main';
 import main from './shared'
 import page from './shared/page'
 console.disableYellowBox = true;
-AppRegistry.registerComponent('AwesomeProject', () => App);
+AppRegistry.registerComponent('AwesomeProject', () => main);

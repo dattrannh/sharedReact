@@ -27,12 +27,14 @@ export default class main extends Component {
       photo: null,
       openProgress: new Animated.Value(0),
       isAnimating: false,
+      pageY:0
     };
   }
   static childContextTypes = {
     onImageRef: PropTypes.func
   };
   getChildContext() {
+    console.log('myInfo: ' )
     return { onImageRef: this._onImageRef };
   }
 
@@ -49,28 +51,30 @@ export default class main extends Component {
         outputRange: [1, 0]
       })
     );
-    this.setState({ photo, isAnimating: true }, () => {
+    this.setState({ photo}, () => {
       Animated.timing(this.state.openProgress, {
         toValue: 1,
         duration: 300,
         useNativeDriver: true
       }).start(() => {
-        this.setState({isAnimating: false });
+        // this.setState({isAnimating: false });
       });
     });
   };
 
-  close = photoId => {
-    this.setState({photo: null,isAnimating: true}, () => {
+  close = (photoId,pageY = 0) => {
+    this.props.navigation.setParams({show:true})
+    this.setState({pageY: pageY})
       Animated.timing(this.state.openProgress, {
         toValue: 0,
         duration: 300,
         useNativeDriver: true
       }).start(() => {
         this._imageOpacitySetters[photoId](1);
-        this.setState({photo: null,isAnimating: false });
+        this.setState({photo: null,pageY:0});
+        this.detailScreen.resetAnim()
       });
-    });
+    // });
   };
   render() {
     const { photo, openProgress, isAnimating } = this.state;
@@ -96,13 +100,15 @@ export default class main extends Component {
           openProgress={openProgress}
           photo={photo}
           sourceImageRefs={this._images}
-          isAnimating={isAnimating}
+          pageY={this.state.pageY}
         />
         <DetailScreen
+          ref = {v=>{this.detailScreen=v}}
           photo={photo}
-          onClose={this.close}
+          sourceImageRefs={this._images}
+          onClose={this.close.bind(this)}
           openProgress={openProgress}
-          isAnimating={isAnimating}
+          // isAnimating={isAnimating}
           data={data}
         />
       </View>
@@ -120,14 +126,4 @@ export default class main extends Component {
       </TouchableHighlight>
     );
   };
-  componentDidMount() {
-    BackHandler.addEventListener(
-      "hardwareBackPress",
-      this.onBackPress.bind(this)
-    );
-  }
-  onBackPress() {
-    this.close();
-    return true;
-  }
 }
